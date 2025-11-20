@@ -18,6 +18,7 @@ import { config } from '@/config';
 import { errorMiddleware } from '@/middleware/error';
 import { notFoundMiddleware } from '@/middleware/notFound';
 import apiRoutes from '@/routes';
+import { runDatabaseMigrations } from './migrations/migration-runner';
 
 const app: Application = express();
 
@@ -54,7 +55,12 @@ let server: any;
 
 async function startApplication() {
   try {
-    console.log('Starting BookNest API server...');
+    console.log('Checking database migrations...');
+    await runDatabaseMigrations({
+      skipIfNoNewMigrations: true,
+      logLevel: 'minimal',
+    });
+    console.log('✓ Database ready\n');
 
     server = app.listen(config.api.port, () => {
       console.log(
